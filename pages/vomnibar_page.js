@@ -31,6 +31,7 @@ export async function activate(options) {
     completer: "omni",
     query: "",
     newTab: false,
+    splitTab: false,
     selectFirst: false,
     keyword: null,
     prefixCount: 1,
@@ -45,6 +46,7 @@ export async function activate(options) {
   ui.refreshCompletions();
   ui.setInitialSelectionValue(options.selectFirst ? 0 : -1);
   ui.setForceNewTab(options.newTab);
+  ui.splitTab = options.splitTab;
   ui.setQuery(options.query);
   ui.setPrefixCount(options.prefixCount);
   ui.setActiveUserSearchEngine(userSearchEngines.keywordToEngine[options.keyword]);
@@ -438,7 +440,8 @@ class VomnibarUI {
 
   openCompletion(completion, openInNewTab) {
     if (completion.description == "tab") {
-      chrome.runtime.sendMessage({ handler: "selectSpecificTab", id: completion.tabId });
+      const handler = this.splitTab ? "splitWithTab" : "selectSpecificTab";
+      chrome.runtime.sendMessage({ handler, id: completion.tabId });
     } else {
       this.launchUrl(completion.url, openInNewTab);
     }
@@ -447,13 +450,11 @@ class VomnibarUI {
   async launchUrl(url, openInNewTab) {
     // If the URL is a bookmarklet (so, prefixed with "javascript:"), then always open it in the
     // current tab.
-    if (openInNewTab && UrlUtils.hasJavascriptProtocol(url)) {
-      openInNewTab = false;
-    }
-    await chrome.runtime.sendMessage({
-      handler: openInNewTab ? "openUrlInNewTab" : "openUrlInCurrentTab",
-      url,
-    });
+    const isJavascript = UrlUtils.hasJavascriptProtocol(url);
+    if (isJavascript) openInNewTab = false;
+    let handler = openInNewTab ? "openUrlInNewTab" : "openUrlInCurrentTab";
+    if (this.splitTab && !isJavascript) handler = "openUrlInSplit";
+    await chrome.runtime.sendMessage({ handler, url });
   }
 
   initDom() {

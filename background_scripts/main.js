@@ -342,6 +342,52 @@ const BackgroundCommands = {
       chrome.tabs.update(tab.id, { pinned: !tab.pinned });
     });
   },
+  async splitTab({ tab }) {
+    try {
+      console.log("splitTab", tab.id, tab.index, tab.splitViewId);
+      const none = chrome.tabs.SPLIT_VIEW_ID_NONE;
+      if ((tab.splitViewId ?? none) !== none) return;
+      const [next] = await chrome.tabs.query({ windowId: tab.windowId, index: tab.index + 1 });
+      const canPair = next && next.pinned === tab.pinned && next.groupId === tab.groupId &&
+        (next.splitViewId ?? none) === none;
+      if (canPair) {
+        await chrome.tabs.createSplit([tab.id, next.id]);
+      } else {
+        await chrome.tabs.create({ splitWithTabId: tab.id });
+      }
+    } catch (e) {
+      console.error("splitTab failed", e);
+    }
+  },
+  async unsplitTab({ tab }) {
+    const none = chrome.tabs.SPLIT_VIEW_ID_NONE;
+    if ((tab.splitViewId ?? none) === none) return;
+    await chrome.tabs.unsplit(tab.splitViewId);
+  },
+  async swapSplitPanes({ tab }) {
+    try {
+      const none = chrome.tabs.SPLIT_VIEW_ID_NONE;
+      if ((tab.splitViewId ?? none) === none) return;
+      const tabs = await chrome.tabs.query({ windowId: tab.windowId });
+      const [left, right] = tabs.filter((t) => t.splitViewId === tab.splitViewId)
+        .sort((a, b) => a.index - b.index);
+      if (!right) return;
+      // No swap API, so re-create the split with the tab order reversed.
+      await chrome.tabs.unsplit(tab.splitViewId);
+      await chrome.tabs.move(right.id, { index: left.index });
+      await chrome.tabs.createSplit([right.id, left.id]);
+      await chrome.tabs.update(tab.id, { active: true });
+    } catch (e) {
+      console.error("swapSplitPanes failed", e);
+    }
+  },
+  async focusOtherSplitPane({ tab }) {
+    const none = chrome.tabs.SPLIT_VIEW_ID_NONE;
+    if ((tab.splitViewId ?? none) === none) return;
+    const tabs = await chrome.tabs.query({ windowId: tab.windowId });
+    const other = tabs.find((t) => t.splitViewId === tab.splitViewId && t.id !== tab.id);
+    if (other) await chrome.tabs.update(other.id, { active: true });
+  },
   toggleMuteTab,
   moveTabLeft: moveTab,
   moveTabRight: moveTab,
@@ -651,6 +697,35 @@ const sendRequestHandlers = {
 
   nextFrame: BackgroundCommands.nextFrame,
   selectSpecificTab,
+  async splitWithTab(request, sender) {
+    try {
+      const tab = sender.tab;
+      const none = chrome.tabs.SPLIT_VIEW_ID_NONE;
+      if (request.id === tab.id || (tab.splitViewId ?? none) !== none) return;
+      const other = await chrome.tabs.get(request.id);
+      if ((other.splitViewId ?? none) !== none) await chrome.tabs.unsplit(other.splitViewId);
+      // Place the chosen tab right of the current one so it becomes the right pane. A tab moved
+      // from the left shifts the current tab left by one, so its target index is tab.index.
+      const fromLeft = other.windowId === tab.windowId && other.index < tab.index;
+      const index = tab.index + (fromLeft ? 0 : 1);
+      await chrome.tabs.move(other.id, { windowId: tab.windowId, index });
+      await chrome.tabs.createSplit([tab.id, other.id]);
+    } catch (e) {
+      console.error("splitWithTab failed", e);
+    }
+  },
+  async openUrlInSplit(request, sender) {
+    try {
+      const tab = sender.tab;
+      const none = chrome.tabs.SPLIT_VIEW_ID_NONE;
+      if ((tab.splitViewId ?? none) !== none) return;
+      // Reuses openUrlInNewTab so search queries work; it places the new tab right after this one.
+      const newTab = await TabOperations.openUrlInNewTab({ url: request.url, tab });
+      await chrome.tabs.createSplit([tab.id, newTab.id]);
+    } catch (e) {
+      console.error("openUrlInSplit failed", e);
+    }
+  },
   createMark: marks.create,
   gotoMark: marks.goto,
   // Send a message to all frames in the current tab. If request.frameId is provided, then send

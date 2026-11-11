@@ -24,6 +24,22 @@ const Vomnibar = {
     });
   },
 
+  activateSplitTabSelection(sourceFrameId) {
+    this.open(sourceFrameId, {
+      completer: "tabs",
+      selectFirst: true,
+      splitTab: true,
+    });
+  },
+
+  activateBookmarksInSplit(sourceFrameId) {
+    this.open(sourceFrameId, { completer: "bookmarks", selectFirst: true, splitTab: true });
+  },
+
+  activateInSplit(sourceFrameId) {
+    this.open(sourceFrameId, { completer: "omni", splitTab: true });
+  },
+
   activateBookmarks(sourceFrameId, registryEntry) {
     const options = Object.assign({}, registryEntry.options, {
       completer: "bookmarks",

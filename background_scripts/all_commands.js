@@ -358,6 +358,30 @@ const allCommands = [
   },
 
   {
+    name: "Vomnibar.activateSplitTabSelection",
+    desc: "Split current tab with an open tab chosen from the Vomnibar",
+    group: "vomnibar",
+    topFrame: true,
+    noRepeat: true,
+  },
+
+  {
+    name: "Vomnibar.activateBookmarksInSplit",
+    desc: "Open a bookmark in a split view to the right",
+    group: "vomnibar",
+    topFrame: true,
+    noRepeat: true,
+  },
+
+  {
+    name: "Vomnibar.activateInSplit",
+    desc: "Open URL, bookmark or history entry in a split view to the right",
+    group: "vomnibar",
+    topFrame: true,
+    noRepeat: true,
+  },
+
+  {
     name: "Vomnibar.activateEditUrl",
     desc: "Edit the current URL",
     group: "vomnibar",
@@ -502,6 +526,38 @@ const allCommands = [
   {
     name: "togglePinTab",
     desc: "Pin or unpin current tab",
+    group: "tabs",
+    background: true,
+    noRepeat: true,
+  },
+
+  {
+    name: "splitTab",
+    desc: "Split current tab with the tab to its right (or a new tab)",
+    group: "tabs",
+    background: true,
+    noRepeat: true,
+  },
+
+  {
+    name: "unsplitTab",
+    desc: "Separate the current split view",
+    group: "tabs",
+    background: true,
+    noRepeat: true,
+  },
+
+  {
+    name: "swapSplitPanes",
+    desc: "Swap the left and right panes of the split view",
+    group: "tabs",
+    background: true,
+    noRepeat: true,
+  },
+
+  {
+    name: "focusOtherSplitPane",
+    desc: "Move focus to the other pane of the split view",
     group: "tabs",
     background: true,
     noRepeat: true,
