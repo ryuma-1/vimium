@@ -359,6 +359,15 @@ const BackgroundCommands = {
       console.error("splitTab failed", e);
     }
   },
+  async splitNewTab({ tab }) {
+    try {
+      const none = chrome.tabs.SPLIT_VIEW_ID_NONE;
+      if ((tab.splitViewId ?? none) !== none) return;
+      await chrome.tabs.create({ splitWithTabId: tab.id });
+    } catch (e) {
+      console.error("splitNewTab failed", e);
+    }
+  },
   async unsplitTab({ tab }) {
     const none = chrome.tabs.SPLIT_VIEW_ID_NONE;
     if ((tab.splitViewId ?? none) === none) return;

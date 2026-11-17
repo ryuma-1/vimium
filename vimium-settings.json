@@ -1,4 +1,4 @@
 {
-  "keyMappings": "# 分割ビュー\nmap <a-v> unsplitTab\nmap <a-c> swapSplitPanes\nmap <a-j> focusOtherSplitPane\nmap <a-t> Vomnibar.activateSplitTabSelection\nmap <a-b> Vomnibar.activateBookmarksInSplit\nmap <a-o> Vomnibar.activateInSplit\n",
+  "keyMappings": "# 分割ビュー\nmap <a-n> splitNewTab\nmap <a-v> unsplitTab\nmap <a-c> swapSplitPanes\nmap <a-j> focusOtherSplitPane\nmap <a-t> Vomnibar.activateSplitTabSelection\nmap <a-b> Vomnibar.activateBookmarksInSplit\nmap <a-o> Vomnibar.activateInSplit\n",
   "settingsVersion": "2.4.2"
 }

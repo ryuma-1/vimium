@@ -477,6 +477,7 @@ const defaultKeyMappings = {
   "X": "restoreTab",
   "<a-p>": "togglePinTab",
   "<a-m>": "toggleMuteTab",
+  "<a-n>": "splitNewTab",
   "<a-v>": "unsplitTab",
   "<a-c>": "swapSplitPanes",
   "<a-j>": "focusOtherSplitPane",

@@ -540,6 +540,14 @@ const allCommands = [
   },
 
   {
+    name: "splitNewTab",
+    desc: "Open a new tab to the right in a split view",
+    group: "tabs",
+    background: true,
+    noRepeat: true,
+  },
+
+  {
     name: "unsplitTab",
     desc: "Separate the current split view",
     group: "tabs",
